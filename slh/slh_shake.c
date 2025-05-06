@@ -16,6 +16,7 @@
 static void shake_h_msg( slh_ctx_t *ctx,
                             uint8_t *h,
                             const uint8_t *r,
+                            const uint8_t *pre, size_t pre_sz,
                             const uint8_t *m, size_t m_sz)
 {
     sha3_ctx_t sha3;
@@ -25,6 +26,7 @@ static void shake_h_msg( slh_ctx_t *ctx,
     shake_update(&sha3, r, n);
     shake_update(&sha3, ctx->pk_seed, n);
     shake_update(&sha3, ctx->pk_root, n);
+    shake_update(&sha3, pre, pre_sz);
     shake_update(&sha3, m, m_sz);
 
     shake_out(&sha3, h, ctx->prm->m);
@@ -59,6 +61,7 @@ static void shake_prf(slh_ctx_t *ctx, uint8_t *h)
 
 static void shake_prf_msg(  slh_ctx_t *ctx,
                                 uint8_t *h, const uint8_t *opt_rand,
+                                const uint8_t *pre, size_t pre_sz,
                                 const uint8_t *m, size_t m_sz)
 {
     sha3_ctx_t sha3;
@@ -67,6 +70,7 @@ static void shake_prf_msg(  slh_ctx_t *ctx,
     shake256_init(&sha3);
     shake_update(&sha3, ctx->sk_prf, n);
     shake_update(&sha3, opt_rand, n);
+    shake_update(&sha3, pre, pre_sz);
     shake_update(&sha3, m, m_sz);
 
     shake_out(&sha3, h, n);

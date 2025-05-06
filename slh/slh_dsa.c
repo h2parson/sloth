@@ -7,6 +7,7 @@
 #include "slh_ctx.h"
 #include "slh_adrs.h"
 #include <assert.h>
+#include <cstddef>
 
 //  === Internal
 
@@ -489,14 +490,14 @@ size_t slh_sk_sz(const slh_param_t *prm)
 //  === Deterministic portion of SLH-DSA key pair generation.
 //  Algorithm 18: slh_keygen_internal()
 
-int slh_keygen_internal(uint8_t *pk, uint8_t *sk, const slh_param_t *prm, const slh_ctx_t *ctx)
+int slh_keygen_internal(uint8_t *pk, uint8_t *sk, const slh_param_t *prm, slh_ctx_t *ctx)
 {
     uint8_t     pk_root[SLH_MAX_N];
     size_t      n = prm->n;
 
-    adrs_zero(&ctx);
-    adrs_set_layer_address(&ctx, prm->d - 1);
-    xmss_node(&ctx, pk_root, 0, prm->hp);
+    adrs_zero(ctx);
+    adrs_set_layer_address(ctx, prm->d - 1);
+    xmss_node(ctx, pk_root, 0, prm->hp);
 
     //  fill pk_root
     memcpy(sk + 3 * n, pk_root, n);
@@ -517,7 +518,7 @@ int slh_keygen(uint8_t *pk, uint8_t *sk, int (*rbg)(uint8_t *x, size_t xlen),
     memset(sk + 3 * n, 0x00, n);        //  PK.root not generated yet
     prm->mk_ctx(&ctx, NULL, sk, prm);   //  fill in partial
 
-    if (*(sk) == NULL || *(sk + 1 * n) == NULL || *(sk + 2 * n) == NULL)
+    if ((sk) == NULL)
     {
         return -1;                      //  random bit generation failed
     }
@@ -526,7 +527,7 @@ int slh_keygen(uint8_t *pk, uint8_t *sk, int (*rbg)(uint8_t *x, size_t xlen),
 }
 
 //  === Generate an SLH-DSA signature.
-//  Algorithm 18: slh_sign(M, SK)
+//  Algorithms 22 and 23: slh_sign(M, SK)
 
 //  (Shared helper function for algorithms 18 and 19.)
 
@@ -577,9 +578,9 @@ size_t slh_do_sign( slh_ctx_t *ctx, uint8_t *sig, const uint8_t *digest)
 }
 
 // Deterministic portion of signing
-size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
-                const uint8_t *sk, int (*rbg)(uint8_t *x, size_t xlen),
-                const slh_param_t *prm)
+size_t slh_sign_internal(uint8_t *sig, const uint8_t *pre, size_t pre_sz, 
+    const uint8_t *m, size_t m_sz, const uint8_t *sk,
+    const slh_param_t *prm, uint8_t *add_rnd)
 {
     uint8_t opt_rand[SLH_MAX_N];
     uint8_t digest[SLH_MAX_M];
@@ -591,14 +592,14 @@ size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
     #ifdef SLH_DETERMINISTIC
         memcpy(opt_rand, ctx.pk_seed, prm->n);
     #else
-        rbg(opt_rand, prm->n);
+        memcpy(opt_rand, add_rnd, prm->n);
     #endif
 
     //  randomized hashing; R
     uint8_t *r  = sig;
     size_t  sig_sz = prm->n;
-    prm->prf_msg(&ctx, r, opt_rand, m, m_sz);
-    prm->h_msg(&ctx, digest, r, m, m_sz);
+    prm->prf_msg(&ctx, r, opt_rand, pre, pre_sz, m, m_sz);
+    prm->h_msg(&ctx, digest, r, pre, pre_sz, m, m_sz);
 
     //  create FORS and HT signature parts
     sig_sz += slh_do_sign(&ctx, sig + sig_sz, digest);
@@ -631,7 +632,17 @@ size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
         }
     #endif
 
-    uint8_t *m_p = (uint8_t*)malloc((2 + ctx_str_len + m_sz) * sizeof(uint8_t));
+    uint8_t pre[MAX_PRE_SIZE];
+    size_t pre_sz = 2 + ctx_str_len;
+
+    pre[0] = 0;
+    pre[1] = ctx_str_len;
+    for (uint8_t i = 0; i < MAX_PRE_SIZE - 2; i++)
+    {
+        pre[2 + i] = ctx_str[i];
+    }
+
+    return slh_sign_internal(sig,pre,pre_sz,m,m_sz,sk,prm,add_rnd);
 }
 
 //  === Verify an SLH-DSA signature.

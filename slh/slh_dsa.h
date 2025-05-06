@@ -14,6 +14,8 @@ extern "C" {
 #include <stddef.h>
 #include <stdbool.h>
 
+#define MAX_PRE_SIZE 257
+
 typedef struct  slh_param_s slh_param_t;
 
 //  === SLH-DSA parameter sets
@@ -50,11 +52,9 @@ int slh_keygen( uint8_t *pk, uint8_t *sk,
                 const slh_param_t *prm);
 
 //  Generate a SLH-DSA signature.
-size_t slh_sign(uint8_t *sig,
-                const uint8_t *m, size_t m_sz,
-                const uint8_t *sk,
-                int (*rbg)(uint8_t *x, size_t xlen),
-                const slh_param_t *prm);
+size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
+                const uint8_t *sk, int (*rbg)(uint8_t *x, size_t xlen),
+                const slh_param_t *prm, char *ctx_str);
 
 //  Verify an SLH-DSA signature.
 bool slh_verify(const uint8_t *m, size_t m_sz,

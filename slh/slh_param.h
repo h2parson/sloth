@@ -40,9 +40,11 @@ struct slh_param_s {
     void (*wots_chain)(slh_ctx_t *ctx,  uint8_t *tmp, uint32_t s);
     void (*fors_hash)(slh_ctx_t *ctx,   uint8_t *tmp, uint32_t s);
     void (*h_msg)(slh_ctx_t *ctx,   uint8_t *h, const uint8_t *r,
+                                    const uint8_t *pre, size_t pre_sz,
                                     const uint8_t *m, size_t m_sz);
     void (*prf)(slh_ctx_t *ctx,     uint8_t *h);
     void (*prf_msg)(slh_ctx_t *ctx, uint8_t *h, const uint8_t *opt_rand,
+                                    const uint8_t *pre, size_t pre_sz,
                                     const uint8_t *m, size_t m_sz);
     void (*h_f)(slh_ctx_t *ctx, uint8_t *h, const uint8_t *m1);
     void (*h_h)(slh_ctx_t *ctx, uint8_t *h,

@@ -99,7 +99,9 @@ int kat_test(const slh_param_t *iut, int katnum)
         kat_hex(fh, "pk", pk, pk_sz);
         kat_hex(fh, "sk", sk, sk_sz);
 
-        sm_sz = slh_sign(sm, msg, msg_sz, sk, &iut_randombytes, iut);
+        uint8_t ctx_str[4];
+        size_t ctx_str_len = 4;
+        sm_sz = slh_sign(sm, msg, msg_sz, sk, &iut_randombytes, iut,ctx_str,ctx_str_len);
 
         memcpy(sm + sm_sz, msg, msg_sz);
         sm_sz += msg_sz;
@@ -109,7 +111,7 @@ int kat_test(const slh_param_t *iut, int katnum)
         fprintf(fh, "\n");
         assert(sm_sz == sig_sz + msg_sz);
 
-        if (!slh_verify(sm + sig_sz, msg_sz, sm, pk, iut)) {
+        if (!slh_verify(sm + sig_sz, msg_sz, sm, pk, iut,ctx_str,ctx_str_len)) {
             fail++;
             fprintf(stderr, "[FAIL] slh_verify() fails.\n");
         }
@@ -121,7 +123,7 @@ int kat_test(const slh_param_t *iut, int katnum)
                         (((uint32_t) seed[7]) << 24);
         xbit %= (8 * sm_sz);
         sm[xbit >> 3] ^= 1 << (xbit & 7);
-        if (slh_verify(sm + sig_sz, msg_sz, sm, pk, iut)) {
+        if (slh_verify(sm + sig_sz, msg_sz, sm, pk, iut,ctx_str,ctx_str_len)) {
             fail++;
             fprintf(stderr, "[FAIL] slh_verify() forgery bit= %u.\n", xbit);
         }

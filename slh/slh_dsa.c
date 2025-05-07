@@ -7,7 +7,6 @@
 #include "slh_ctx.h"
 #include "slh_adrs.h"
 #include <assert.h>
-#include <cstddef>
 
 //  === Internal
 
@@ -527,7 +526,7 @@ int slh_keygen(uint8_t *pk, uint8_t *sk, int (*rbg)(uint8_t *x, size_t xlen),
 }
 
 //  === Generate an SLH-DSA signature.
-//  Algorithms 22 and 23: slh_sign(M, SK)
+//  Algorithm 22 : slh_sign(M, SK)
 
 //  (Shared helper function for algorithms 18 and 19.)
 
@@ -610,10 +609,8 @@ size_t slh_sign_internal(uint8_t *sig, const uint8_t *pre, size_t pre_sz,
 // Pure signing wrapper function
 size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
     const uint8_t *sk, int (*rbg)(uint8_t *x, size_t xlen),
-    const slh_param_t *prm, char *ctx_str)
+    const slh_param_t *prm, uint8_t *ctx_str, size_t ctx_str_len)
 {
-    size_t ctx_str_len = strlen(ctx_str);
-    
     if (ctx_str_len > SLH_MAX_CTX_STR_LEN)
     {
         return -1;
@@ -622,11 +619,9 @@ size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
     uint8_t add_rnd[SLH_MAX_N];
 
     #ifdef SLH_DETERMINISTIC
-        add_rnd = NULL;
+        // add_rnd not needed here so is uninitialized
     #else
-        rbg(add_rnd, prm->n);
-        
-        if (add_rnd == NULL)
+        if (rbg(add_rnd, prm->n) != 0)
         {
             return -1;
         }
@@ -637,7 +632,7 @@ size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
 
     pre[0] = 0;
     pre[1] = ctx_str_len;
-    for (uint8_t i = 0; i < MAX_PRE_SIZE - 2; i++)
+    for (uint8_t i = 0; i < ctx_str_len; i++)
     {
         pre[2 + i] = ctx_str[i];
     }
@@ -646,9 +641,10 @@ size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
 }
 
 //  === Verify an SLH-DSA signature.
-//  Algorithm 19: slh_verify(M, SIG, PK)
+//  Algorithm 20: slh_verify_internal(M, SIG, PK)
 
-bool slh_verify(const uint8_t *m, size_t m_sz,
+bool slh_verify_internal(const uint8_t *pre, size_t pre_sz,
+                const uint8_t *m, size_t m_sz,
                 const uint8_t *sig, const uint8_t *pk,
                 const slh_param_t *prm)
 {
@@ -662,7 +658,7 @@ bool slh_verify(const uint8_t *m, size_t m_sz,
     const uint8_t   *sig_ht     = sig + ((1 + prm->k*(1 + prm->a)) * prm->n);
 
     prm->mk_ctx(&ctx, pk, NULL, prm);
-    prm->h_msg(&ctx, digest, r, m, m_sz);
+    prm->h_msg(&ctx, digest, r, pre, pre_sz, m, m_sz);
 
     const uint8_t   *md = digest;
     uint64_t        i_tree = 0;
@@ -680,3 +676,26 @@ bool slh_verify(const uint8_t *m, size_t m_sz,
     return sig_ok;
 }
 
+//  Algorithm 24: slh_verify(M, SIG, PK)
+// Pure signature verification
+bool slh_verify(const uint8_t *m, size_t m_sz,
+    const uint8_t *sig, const uint8_t *pk,
+    const slh_param_t *prm, uint8_t *ctx_str, size_t ctx_str_len)
+{
+    if (ctx_str_len > SLH_MAX_CTX_STR_LEN)
+    {
+        return false;
+    }
+
+    uint8_t pre[MAX_PRE_SIZE];
+    size_t pre_sz = 2 + ctx_str_len;
+
+    pre[0] = 0;
+    pre[1] = ctx_str_len;
+    for (uint8_t i = 0; i < ctx_str_len; i++)
+    {
+        pre[2 + i] = ctx_str[i];
+    }
+
+    return slh_verify_internal(pre,pre_sz,m,m_sz,sig,pk,prm);
+}

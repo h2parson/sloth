@@ -54,12 +54,12 @@ int slh_keygen( uint8_t *pk, uint8_t *sk,
 //  Generate a SLH-DSA signature.
 size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
                 const uint8_t *sk, int (*rbg)(uint8_t *x, size_t xlen),
-                const slh_param_t *prm, char *ctx_str);
+                const slh_param_t *prm, uint8_t *ctx_str, size_t ctx_str_len);
 
 //  Verify an SLH-DSA signature.
 bool slh_verify(const uint8_t *m, size_t m_sz,
-                const uint8_t *sig, const uint8_t *pk,
-                const slh_param_t *prm);
+    const uint8_t *sig, const uint8_t *pk,
+    const slh_param_t *prm, uint8_t *ctx_str, size_t ctx_str_len);
 
 #ifdef __cplusplus
 }

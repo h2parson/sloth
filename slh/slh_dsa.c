@@ -613,7 +613,7 @@ size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
 {
     if (ctx_str_len > SLH_MAX_CTX_STR_LEN)
     {
-        return -1;
+        return 0;
     }
 
     uint8_t add_rnd[SLH_MAX_N];
@@ -623,7 +623,7 @@ size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
     #else
         if (rbg(add_rnd, prm->n) != 0)
         {
-            return -1;
+            return 0;
         }
     #endif
 

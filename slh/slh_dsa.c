@@ -7,6 +7,7 @@
 #include "slh_ctx.h"
 #include "slh_adrs.h"
 #include <assert.h>
+#include <stdio.h>
 
 //  === Internal
 
@@ -588,11 +589,18 @@ size_t slh_sign_internal(uint8_t *sig, const uint8_t *pre, size_t pre_sz,
     //  set up secret key etc
     prm->mk_ctx(&ctx, NULL, sk, prm);
 
-    #ifdef SLH_DETERMINISTIC
+    if(deterministic_g == SLH_DETERMINISTIC)
+    {
         memcpy(opt_rand, ctx.pk_seed, prm->n);
-    #else
+    }
+    else if(deterministic_g == SLH_NON_DETERMINISTIC)
+    {
         memcpy(opt_rand, add_rnd, prm->n);
-    #endif
+    }
+    else
+    {
+        return 0;    
+    }
 
     //  randomized hashing; R
     uint8_t *r  = sig;
@@ -618,14 +626,22 @@ size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
 
     uint8_t add_rnd[SLH_MAX_N];
 
-    #ifdef SLH_DETERMINISTIC
+    if(deterministic_g == SLH_DETERMINISTIC)
+    {
+        printf("running in deterministic");
         // add_rnd not needed here so is uninitialized
-    #else
+    }
+    else if(deterministic_g == SLH_NON_DETERMINISTIC)
+    {
         if (rbg(add_rnd, prm->n) != 0)
         {
             return 0;
         }
-    #endif
+    }
+    else
+    {
+        return 0;
+    }
 
     uint8_t pre[MAX_PRE_SIZE];
     size_t pre_sz = 2 + ctx_str_len;

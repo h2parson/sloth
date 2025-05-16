@@ -18,6 +18,23 @@ extern "C" {
 
 typedef struct  slh_param_s slh_param_t;
 
+struct
+{
+    char *skSeedString;
+    char *skPrfString;
+    char *pkSeedString;
+} seed_g;
+
+const slh_param_t *prmSet_g;
+
+enum
+{
+    SLH_DETERMINISTIC,
+    SLH_NON_DETERMINISTIC
+} deterministic_g;
+
+uint8_t addRnd_g[32];
+
 //  === SLH-DSA parameter sets
 extern const slh_param_t slh_dsa_sha2_128s;
 extern const slh_param_t slh_dsa_shake_128s;
@@ -50,6 +67,11 @@ size_t slh_sig_sz(const slh_param_t *prm);
 int slh_keygen( uint8_t *pk, uint8_t *sk,
                 int (*rbg)(uint8_t *x, size_t xlen),
                 const slh_param_t *prm);
+
+//  Internal interface to slh_sign 
+size_t slh_sign_internal(uint8_t *sig, const uint8_t *pre, size_t pre_sz, 
+    const uint8_t *m, size_t m_sz, const uint8_t *sk,
+    const slh_param_t *prm, uint8_t *add_rnd);
 
 //  Generate a SLH-DSA signature.
 size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,

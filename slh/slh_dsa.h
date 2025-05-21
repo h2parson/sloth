@@ -83,6 +83,11 @@ bool slh_verify(const uint8_t *m, size_t m_sz,
     const uint8_t *sig, const uint8_t *pk,
     const slh_param_t *prm, uint8_t *ctx_str, size_t ctx_str_len);
 
+bool slh_verify_internal(const uint8_t *pre, size_t pre_sz,
+    const uint8_t *m, size_t m_sz,
+    const uint8_t *sig, const uint8_t *pk,
+    const slh_param_t *prm);
+
 #ifdef __cplusplus
 }
 #endif

@@ -628,7 +628,6 @@ size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
 
     if(deterministic_g == SLH_DETERMINISTIC)
     {
-        printf("running in deterministic");
         // add_rnd not needed here so is uninitialized
     }
     else if(deterministic_g == SLH_NON_DETERMINISTIC)
@@ -637,6 +636,11 @@ size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
         {
             return 0;
         }
+        // printf("add_rnd = \r\n");
+        // for(int i = 0; i<16; i++){
+        //     printf("%d ",add_rnd[i]);
+        // }
+        // printf("\r\n");
     }
     else
     {

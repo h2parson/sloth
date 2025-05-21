@@ -28,7 +28,7 @@ def makeKeygenTestCmd(tgId,tcId,prmSet,skSeed,skPrf,pkSeed,sk,pk):
     return command
 
 # Creates command to call C program to run a keygen testcase
-def makeSigTestCmd(tgId,tcId,prmSet,deterministic,interface,m_sz,m,ctxLen,ctxStr,sk,sig,addRnd,pk):
+def makeSigTestCmd(tgId,tcId,prmSet,deterministic,interface,m_sz,m,ctxLen,ctxStr,sk,sig,addRnd):
     command = "./ACVP_sig_test "
     command += (str(tgId) + " ")
     command += (str(tcId) + " ")
@@ -41,8 +41,22 @@ def makeSigTestCmd(tgId,tcId,prmSet,deterministic,interface,m_sz,m,ctxLen,ctxStr
     command += (str(ctxStr) + " ")
     command += (str(sk) + " ")
     command += (str(sig) + " ")
-    command += str(addRnd + " ")
-    command += (str(pk))
+    command += str(addRnd)
+    return command
+
+def makeVerTestCmd(tgId,tcId,prmSet,interface,m_sz,m,ctxLen,ctxStr,pk,sig,testPassed):
+    command = "./ACVP_ver_test "
+    command += (str(tgId) + " ")
+    command += (str(tcId) + " ")
+    command += (str(prmSet) + " ")
+    command += (str(interface) + " ")
+    command += (str(m_sz) + " ")
+    command += (str(m) + " ")
+    command += (str(ctxLen) + " ")
+    command += (str(ctxStr) + " ")
+    command += (str(pk) + " ")
+    command += (str(sig) + " ")
+    command += (str(testPassed))
     return command
 
 # Function performs all keygen tests for a given parameter set
@@ -70,31 +84,53 @@ def sigTestPrmSet(prmSet):
         slh_dsa_sig_acvp = json.load(fp)
 
         for variant in slh_dsa_sig_acvp["testGroups"]:
-            if variant["parameterSet"] == prmSet:
-                if variant["signatureInterface"] == "internal":
-                    variantFound = True
-                    for testCase in variant["tests"]:
-                        tgId = str(variant["tgId"])
-                        tcId = str(testCase["tcId"])
-                        prmSet = prmSet
-                        deterministic = str(variant["deterministic"])
-                        interface = str(variant["signatureInterface"])
-                        m = str(testCase["message"])
-                        m_sz = len(m)
-                        if m_sz == 0:
-                            m = "-"
-                        ctxStr = str(testCase["context"]) if interface == "external" else "-"
-                        ctxLen = len(ctxStr)
-                        if ctxLen == 0:
-                            ctxStr = "-"
-                        sk = str(testCase["sk"])
-                        pk = str(testCase["pk"])
-                        sig = str(testCase["signature"])
-                        addRnd = str(testCase["additionalRandomness"]) if deterministic == "false" else "-"
-    
-                        subprocess.run(makeSigTestCmd(tgId,tcId,prmSet,deterministic,interface,m_sz,m,ctxLen,ctxStr,sk,sig,addRnd,pk), shell=True)
-                        if variantFound:
-                            return
+            if variant["parameterSet"] == prmSet and variant["preHash"] != "preHash":
+                for testCase in variant["tests"]:
+                    tgId = str(variant["tgId"])
+                    tcId = str(testCase["tcId"])
+                    prmSet = prmSet
+                    deterministic = str(variant["deterministic"])
+                    interface = str(variant["signatureInterface"])
+                    m = str(testCase["message"])
+                    m_sz = len(m)
+                    if m_sz == 0:
+                        m = "-"
+                    ctxStr = str(testCase["context"]) if interface == "external" else "-"
+                    ctxLen = len(ctxStr)
+                    if ctxLen == 0:
+                        ctxStr = "-"
+                    sk = str(testCase["sk"])
+                    sig = str(testCase["signature"])
+                    addRnd = str(testCase["additionalRandomness"]) if deterministic == "False" else "-"
+
+                    subprocess.run(makeSigTestCmd(tgId,tcId,prmSet,deterministic,interface,m_sz,m,ctxLen,ctxStr,sk,sig,addRnd), shell=True)
+
+# Function performs all verification tests for a given parameter set
+def verTestPrmSet(prmSet):
+    with open("../ACVP-Server-1.1.0.39/gen-val/json-files/SLH-DSA-sigVer-FIPS205/internalProjection.json", 'r') as fp:
+        slh_dsa_ver_acvp = json.load(fp)
+
+        for variant in slh_dsa_ver_acvp["testGroups"]:
+            if variant["parameterSet"] == prmSet and variant["preHash"] != "preHash":
+                for testCase in variant["tests"]:
+                    tgId = str(variant["tgId"])
+                    tcId = str(testCase["tcId"])
+                    prmSet = prmSet
+                    interface = str(variant["signatureInterface"])
+                    m = str(testCase["message"])
+                    m_sz = len(m)
+                    if m_sz == 0:
+                        m = "-"
+                    ctxStr = str(testCase["context"]) if interface == "external" else "-"
+                    ctxLen = len(ctxStr)
+                    if ctxLen == 0:
+                        ctxStr = "-"
+                    pk = str(testCase["pk"])
+                    sig = str(testCase["signature"])
+                    testPassed = testCase["testPassed"]
+
+                    subprocess.run(makeVerTestCmd(tgId,tcId,prmSet,interface,m_sz,m,ctxLen,ctxStr,pk,sig,testPassed), shell=True)
+
 
 # Variable Declaration
 prmSets = ["SLH-DSA-SHA2-128s", "SLH-DSA-SHAKE-128s",
@@ -106,8 +142,13 @@ prmSets = ["SLH-DSA-SHA2-128s", "SLH-DSA-SHAKE-128s",
 
 # Begin main program
 # Keygen tests
-# for prmSet in prmSets:
-#     keygenTestPrmSet(prmSet)
+for prmSet in prmSets:
+    keygenTestPrmSet(prmSet)
 
-# Signature tests
-sigTestPrmSet("SLH-DSA-SHA2-128f")
+# Signing tests
+for prmSet in prmSets:
+    sigTestPrmSet(prmSet)
+
+# Verification tests
+for prmSet in prmSets:
+    verTestPrmSet(prmSet)

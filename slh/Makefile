@@ -9,7 +9,7 @@ TARGET	?=	kat_test
 CSRC	=	$(wildcard *.c)
 DEBUG	?=  0
 
-EXCLUDE_LIST = kat_test.c ACVP_keygen_test.c ACVP_sig_test.c
+EXCLUDE_LIST = kat_test.c ACVP_keygen_test.c ACVP_sig_test.c ACVP_ver_test.c
 
 EXCLUDE_LIST := $(filter-out $(TARGET).c,$(EXCLUDE_LIST))
 CSRC := $(filter-out $(EXCLUDE_LIST),$(CSRC))

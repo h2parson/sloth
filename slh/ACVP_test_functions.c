@@ -113,7 +113,7 @@ int fixedKeygenRbg(uint8_t *x, size_t xlen)
 
 int fixedSigRbg(uint8_t *x, size_t xlen)
 {
-    memcpy(addRnd_g,x,MAX_N);
+    memcpy(x,addRnd_g,xlen);
 
 	return 0;
 }

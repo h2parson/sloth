@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "NIST.CVP.ACVTS.Orleans.ServerHost": {
-      "commandName": "Project",
-      "commandLineArgs": "--console"
-    }
-  }
-}

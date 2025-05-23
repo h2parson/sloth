@@ -102,7 +102,7 @@ int kat_test(const slh_param_t *iut, int katnum)
         uint8_t ctx_str[4];
         size_t ctx_str_len = 4;
 
-           sm_sz = slh_sign(sm, msg, msg_sz, sk, &iut_randombytes, iut,ctx_str,ctx_str_len);
+           sm_sz = slh_sign(sm, msg, msg_sz, ctx_str,ctx_str_len, sk, &iut_randombytes, iut);
 
         memcpy(sm + sm_sz, msg, msg_sz);
         sm_sz += msg_sz;
@@ -112,7 +112,7 @@ int kat_test(const slh_param_t *iut, int katnum)
         fprintf(fh, "\n");
         assert(sm_sz == sig_sz + msg_sz);
 
-        if (!slh_verify(sm + sig_sz, msg_sz, sm, pk, iut,ctx_str,ctx_str_len)) {
+        if (!slh_verify(sm + sig_sz, msg_sz, sm,ctx_str, ctx_str_len, pk, iut)) {
             fail++;
             fprintf(stderr, "[FAIL] slh_verify() fails.\n");
         }

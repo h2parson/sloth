@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
     if(interface == SLH_EXTERNAL)
     {
-        result = slh_verify(m,m_sz,sig,pk,prmSet_g,ctxStr,ctxLen);
+        result = slh_verify(m,m_sz,sig,ctxStr,ctxLen,pk,prmSet_g);
     }
     else {
         result = slh_verify_internal(ctxStr,0,m,m_sz,sig,pk,prmSet_g);

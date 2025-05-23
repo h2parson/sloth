@@ -40,7 +40,7 @@ size_t slh_sig_sz(const slh_param_t *prm)
 }
 
 //  === Compute the base 2**b representation of X.
-//  Algorithm 3: base_2b(X, b, out_len)
+//  Algorithm 4: base_2b(X, b, out_len)
 
 static inline size_t base_2b(   uint32_t *v, const uint8_t *x,
                                 uint32_t b, size_t v_len)
@@ -90,15 +90,15 @@ static inline size_t base_16(   uint32_t *v, const uint8_t *x, int v_len)
 }
 
 //  === Chaining function used in WOTS+
-//  Algorithm 4: chain(X, i, s, PK.seed, ADRS)
+//  Algorithm 5: chain(X, i, s, PK.seed, ADRS)
 //  (see prm->chain)
 
 //  === Generate a WOTS+ public key.
-//  Algorithm 5: wots_PKgen(SK.seed, PK.seed, ADRS)
+//  Algorithm 6: wots_PKgen(SK.seed, PK.seed, ADRS)
 //  (see xmms_node)
 
 //  === Generate a WOTS+ signature on an n-byte message.
-//  Algorithm 6: wots_sign(M, SK.seed, PK.seed, ADRS)
+//  Algorithm 7: wots_sign(M, SK.seed, PK.seed, ADRS)
 
 //  (wots_csum is a shared helper function for algorithms 6 and 7)
 static void wots_csum(uint32_t *vm, const uint8_t *m, const slh_param_t *prm)
@@ -147,7 +147,7 @@ static size_t wots_sign(slh_ctx_t *ctx, uint8_t *sig, const uint8_t *m)
 }
 
 //  === Compute a WOTS+ public key from a message and its signature.
-//  Algorithm 7: wots_PKFromSig(sig, M, PK.seed, ADRS)
+//  Algorithm 8: wots_PKFromSig(sig, M, PK.seed, ADRS)
 
 static void wots_pk_from_sig(   slh_ctx_t *ctx, uint8_t *pk,
                                 const uint8_t *sig,
@@ -176,7 +176,7 @@ static void wots_pk_from_sig(   slh_ctx_t *ctx, uint8_t *pk,
 }
 
 //  === Compute the root of a Merkle subtree of WOTS+ public keys.
-//  Algorithm 8: xmss_node(SK.seed, i, z, PK.seed, ADRS)
+//  Algorithm 9: xmss_node(SK.seed, i, z, PK.seed, ADRS)
 
 static void xmss_node(  slh_ctx_t *ctx, uint8_t *node,
                         uint32_t i, uint32_t z)
@@ -197,7 +197,7 @@ static void xmss_node(  slh_ctx_t *ctx, uint8_t *node,
         adrs_set_key_pair_address(ctx, i);
 
         //  === Generate a WOTS+ public key.
-        //  Algorithm 5: wots_PKgen(SK.seed, PK.seed, ADRS)
+        //  Algorithm 6: wots_PKgen(SK.seed, PK.seed, ADRS)
         sk  = tmp;
         for (k = 0; k < len; k++) {
             adrs_set_chain_address(ctx, k);
@@ -223,7 +223,7 @@ static void xmss_node(  slh_ctx_t *ctx, uint8_t *node,
 }
 
 //  === Generate an XMSS signature.
-//  Algorithm 9: xmss_sign(M, SK.seed, idx, PK.seed, ADRS)
+//  Algorithm 10: xmss_sign(M, SK.seed, idx, PK.seed, ADRS)
 
 static size_t xmss_sign(slh_ctx_t *ctx, uint8_t *sx, const uint8_t *m,
                         uint32_t idx)
@@ -253,7 +253,7 @@ static size_t xmss_sign(slh_ctx_t *ctx, uint8_t *sx, const uint8_t *m,
 }
 
 //  === Compute an XMSS public key from an XMSS signature.
-//  Algorithm 10: xmss_PKFromSig(idx, SIGXMSS, M, PK.seed, ADRS)
+//  Algorithm 11: xmss_PKFromSig(idx, SIGXMSS, M, PK.seed, ADRS)
 
 static void xmss_pk_from_sig(   slh_ctx_t *ctx, uint8_t *root, uint32_t idx,
                                 const uint8_t *sig, const uint8_t *m)
@@ -288,7 +288,7 @@ static void xmss_pk_from_sig(   slh_ctx_t *ctx, uint8_t *root, uint32_t idx,
 
 
 //  === Generate a hypertree signature.
-//  Algorithm 11: ht_sign(M, SK.seed, PK.seed, idx_tree, idx_leaf )
+//  Algorithm 12: ht_sign(M, SK.seed, PK.seed, idx_tree, idx_leaf )
 
 static size_t ht_sign(  slh_ctx_t *ctx, uint8_t *sh, uint8_t *m,
                         uint64_t i_tree, uint32_t i_leaf)
@@ -318,7 +318,7 @@ static size_t ht_sign(  slh_ctx_t *ctx, uint8_t *sh, uint8_t *m,
 
 
 //  === Verify a hypertree signature.
-//  Algorithm 12: ht_verify(M, SIG_HT, PK.seed, idx_tree, idx_leaf, PK.root)
+//  Algorithm 13: ht_verify(M, SIG_HT, PK.seed, idx_tree, idx_leaf, PK.root)
 
 static bool ht_verify(  slh_ctx_t *ctx, const uint8_t *m,
                         const uint8_t *sig_ht,
@@ -353,12 +353,12 @@ static bool ht_verify(  slh_ctx_t *ctx, const uint8_t *m,
 }
 
 //  === Generate a FORS private-key value.
-//  Algorithm 13: fors_SKgen(SK.seed, PK.seed, ADRS, idx)
+//  Algorithm 14: fors_SKgen(SK.seed, PK.seed, ADRS, idx)
 
 //  ( see prm->fors_hash() )
 
 //  === Compute the root of a Merkle subtree of FORS public values.
-//  Algorithm 14: fors_node(SK.seed, i, z, PK.seed, ADRS)
+//  Algorithm 15: fors_node(SK.seed, i, z, PK.seed, ADRS)
 
 static void fors_node(  slh_ctx_t *ctx, uint8_t *node,
                         uint32_t i, uint32_t z)
@@ -393,7 +393,7 @@ static void fors_node(  slh_ctx_t *ctx, uint8_t *node,
 
 
 //  === Generate a FORS signature.
-//  Algorithm 15: fors_sign(md, SK.seed, PK.seed, ADRS)
+//  Algorithm 16: fors_sign(md, SK.seed, PK.seed, ADRS)
 
 static size_t fors_sign(slh_ctx_t *ctx, uint8_t *sf, const uint8_t *md)
 {
@@ -422,7 +422,7 @@ static size_t fors_sign(slh_ctx_t *ctx, uint8_t *sf, const uint8_t *md)
 }
 
 //  === Compute a FORS public key from a FORS signature.
-//  Algorithm 16: fors_pkFromSig(SIGFORS , md, PK.seed, ADRS)
+//  Algorithm 17: fors_pkFromSig(SIGFORS , md, PK.seed, ADRS)
 
 static void fors_pk_from_sig(   slh_ctx_t *ctx, uint8_t *pk,
                                 const uint8_t *sf, const uint8_t *md)
@@ -518,16 +518,11 @@ int slh_keygen(uint8_t *pk, uint8_t *sk, int (*rbg)(uint8_t *x, size_t xlen),
     memset(sk + 3 * n, 0x00, n);        //  PK.root not generated yet
     prm->mk_ctx(&ctx, NULL, sk, prm);   //  fill in partial
 
-    if ((sk) == NULL)
-    {
-        return -1;                      //  random bit generation failed
-    }
-
     return slh_keygen_internal(pk, sk, prm, &ctx);
 }
 
 //  === Generate an SLH-DSA signature.
-//  Algorithm 22 : slh_sign(M, SK)
+//  Algorithm 22: slh_sign(M, SK)
 
 //  (Shared helper function for algorithms 18 and 19.)
 
@@ -578,8 +573,10 @@ size_t slh_do_sign( slh_ctx_t *ctx, uint8_t *sig, const uint8_t *digest)
 }
 
 // Deterministic portion of signing
-size_t slh_sign_internal(uint8_t *sig, const uint8_t *pre, size_t pre_sz, 
+//  Algorithm 19: slh_sign_internal(M, SK, addrnd)
+size_t slh_sign_internal(uint8_t *sig, 
     const uint8_t *m, size_t m_sz, const uint8_t *sk,
+    const uint8_t *pre, size_t pre_sz,
     const slh_param_t *prm, uint8_t *add_rnd)
 {
     uint8_t opt_rand[SLH_MAX_N];
@@ -589,18 +586,12 @@ size_t slh_sign_internal(uint8_t *sig, const uint8_t *pre, size_t pre_sz,
     //  set up secret key etc
     prm->mk_ctx(&ctx, NULL, sk, prm);
 
-    if(deterministic_g == SLH_DETERMINISTIC)
-    {
+    #ifdef SLH_DETERMINISTIC
         memcpy(opt_rand, ctx.pk_seed, prm->n);
-    }
-    else if(deterministic_g == SLH_NON_DETERMINISTIC)
-    {
+    #endif
+    #ifndef SLH_DETERMINISTIC
         memcpy(opt_rand, add_rnd, prm->n);
-    }
-    else
-    {
-        return 0;    
-    }
+    #endif
 
     //  randomized hashing; R
     uint8_t *r  = sig;
@@ -616,8 +607,8 @@ size_t slh_sign_internal(uint8_t *sig, const uint8_t *pre, size_t pre_sz,
 
 // Pure signing wrapper function
 size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
-    const uint8_t *sk, int (*rbg)(uint8_t *x, size_t xlen),
-    const slh_param_t *prm, uint8_t *ctx_str, size_t ctx_str_len)
+    uint8_t *ctx_str, size_t ctx_str_len, const uint8_t *sk,
+    int (*rbg)(uint8_t *x, size_t xlen), const slh_param_t *prm)
 {
     if (ctx_str_len > SLH_MAX_CTX_STR_LEN)
     {
@@ -626,38 +617,27 @@ size_t slh_sign(uint8_t *sig, const uint8_t *m, size_t m_sz,
 
     uint8_t add_rnd[SLH_MAX_N];
 
-    if(deterministic_g == SLH_DETERMINISTIC)
-    {
+    #ifdef SLH_DETERMINISTIC
         // add_rnd not needed here so is uninitialized
-    }
-    else if(deterministic_g == SLH_NON_DETERMINISTIC)
-    {
+    #endif
+    #ifndef SLH_DETERMINISTIC
         if (rbg(add_rnd, prm->n) != 0)
         {
             return 0;
         }
-        // printf("add_rnd = \r\n");
-        // for(int i = 0; i<16; i++){
-        //     printf("%d ",add_rnd[i]);
-        // }
-        // printf("\r\n");
-    }
-    else
-    {
-        return 0;
-    }
+    #endif
 
     uint8_t pre[MAX_PRE_SIZE];
     size_t pre_sz = 2 + ctx_str_len;
 
     pre[0] = 0;
     pre[1] = ctx_str_len;
-    for (uint8_t i = 0; i < ctx_str_len; i++)
+    for (size_t i = 0; i < ctx_str_len; i++)
     {
         pre[2 + i] = ctx_str[i];
     }
 
-    return slh_sign_internal(sig,pre,pre_sz,m,m_sz,sk,prm,add_rnd);
+    return slh_sign_internal(sig,m,m_sz,sk,pre,pre_sz,prm,add_rnd);
 }
 
 //  === Verify an SLH-DSA signature.
@@ -699,8 +679,8 @@ bool slh_verify_internal(const uint8_t *pre, size_t pre_sz,
 //  Algorithm 24: slh_verify(M, SIG, PK)
 // Pure signature verification
 bool slh_verify(const uint8_t *m, size_t m_sz,
-    const uint8_t *sig, const uint8_t *pk,
-    const slh_param_t *prm, uint8_t *ctx_str, size_t ctx_str_len)
+    const uint8_t *sig, uint8_t *ctx_str, size_t ctx_str_len,
+    const uint8_t *pk, const slh_param_t *prm)
 {
     if (ctx_str_len > SLH_MAX_CTX_STR_LEN)
     {
@@ -712,7 +692,7 @@ bool slh_verify(const uint8_t *m, size_t m_sz,
 
     pre[0] = 0;
     pre[1] = ctx_str_len;
-    for (uint8_t i = 0; i < ctx_str_len; i++)
+    for (size_t i = 0; i < ctx_str_len; i++)
     {
         pre[2 + i] = ctx_str[i];
     }

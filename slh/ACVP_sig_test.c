@@ -62,10 +62,10 @@ int main(int argc, char *argv[])
 
     if(interface == SLH_EXTERNAL)
     {
-        slh_sign(sig,m,m_sz,sk,fixedSigRbg,prmSet_g,ctxStr,ctxLen);
+        slh_sign(sig,m,m_sz, ctxStr,ctxLen, sk,fixedSigRbg,prmSet_g);
     }
     else {
-        slh_sign_internal(sig,0,0,m,m_sz,sk,prmSet_g,addRnd_g);
+        slh_sign_internal(sig,m,m_sz,sk,0,0,prmSet_g,addRnd_g);
     }
 
 	if(memcmp(sig,sigExpected,sig_sz))

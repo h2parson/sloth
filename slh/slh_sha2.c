@@ -15,7 +15,8 @@
 //      MGF1-SHA-256(R || PK.seed || SHA-256(R ||PK.seed || PK.root || M), m)
 
 static void sha2_256_h_msg( slh_ctx_t *ctx, uint8_t *h,
-                            const uint8_t *r, const uint8_t *m, size_t m_sz)
+                            const uint8_t *r, const uint8_t *pre, size_t pre_sz,
+                            const uint8_t *m, size_t m_sz)
 {
     sha256_t sha2;
     uint8_t mgf[16 + 16 + 32 + 4];
@@ -30,6 +31,7 @@ static void sha2_256_h_msg( slh_ctx_t *ctx, uint8_t *h,
     sha256_update(&sha2, r, n);
     sha256_update(&sha2, ctx->pk_seed, n);
     sha256_update(&sha2, ctx->pk_root, n);
+    sha256_update(&sha2, pre, pre_sz);
     sha256_update(&sha2, m, m_sz);
     sha256_final(&sha2, mgf + 2 * n);
 
@@ -60,7 +62,8 @@ static void sha2_256_h_msg( slh_ctx_t *ctx, uint8_t *h,
 //      MGF1-SHA-512(R || PK.seed || SHA-512(R || PK.seed || PK.root || M), m)
 
 static void sha2_512_h_msg( slh_ctx_t *ctx, uint8_t *h,
-                            const uint8_t *r, const uint8_t *m, size_t m_sz)
+                            const uint8_t *r, const uint8_t *pre, size_t pre_sz,
+                            const uint8_t *m, size_t m_sz)
 {
     sha512_t sha2;
     uint8_t mgf[32 + 32 + 64 + 4];
@@ -75,6 +78,7 @@ static void sha2_512_h_msg( slh_ctx_t *ctx, uint8_t *h,
     sha512_update(&sha2, r, n);
     sha512_update(&sha2, ctx->pk_seed, n);
     sha512_update(&sha2, ctx->pk_root, n);
+    sha512_update(&sha2, pre, pre_sz);
     sha512_update(&sha2, m, m_sz);
     sha512_final(&sha2, mgf + 2 * n);
 
@@ -139,6 +143,7 @@ static void sha256_prf( slh_ctx_t *ctx,
 static void sha256_prf_msg( slh_ctx_t *ctx,
                             uint8_t *h,
                             const uint8_t *opt_rand,
+                            const uint8_t *pre, size_t pre_sz,
                             const uint8_t *m, size_t m_sz)
 {
     unsigned i;
@@ -156,6 +161,7 @@ static void sha256_prf_msg( slh_ctx_t *ctx,
     sha256_init(&sha2);
     sha256_update(&sha2, pad, 64);
     sha256_update(&sha2, opt_rand, n);
+    sha256_update(&sha2, pre, pre_sz);
     sha256_update(&sha2, m, m_sz);
     sha256_final(&sha2, buf);
 
@@ -175,6 +181,7 @@ static void sha256_prf_msg( slh_ctx_t *ctx,
 
 static void sha512_prf_msg( slh_ctx_t *ctx,
                             uint8_t *h, const uint8_t *opt_rand,
+                            const uint8_t *pre, size_t pre_sz,
                             const uint8_t *m, size_t m_sz)
 {
     unsigned i;
@@ -192,6 +199,7 @@ static void sha512_prf_msg( slh_ctx_t *ctx,
     sha512_init(&sha2);
     sha512_update(&sha2, pad, 128);
     sha512_update(&sha2, opt_rand, n);
+    sha512_update(&sha2, pre, pre_sz);
     sha512_update(&sha2, m, m_sz);
     sha512_final(&sha2, buf);
 

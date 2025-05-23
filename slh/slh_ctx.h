@@ -10,12 +10,13 @@
 #include "sha2_api.h"
 
 //  some structural sizes
-#define SLH_MAX_N   32
-#define SLH_MAX_LEN (2 * SLH_MAX_N + 3)
-#define SLH_MAX_K   35
-#define SLH_MAX_M   49
-#define SLH_MAX_HP  9
-#define SLH_MAX_A   14
+#define SLH_MAX_N           32
+#define SLH_MAX_LEN         (2 * SLH_MAX_N + 3)
+#define SLH_MAX_K           35
+#define SLH_MAX_M           49
+#define SLH_MAX_HP          9
+#define SLH_MAX_A           14
+#define SLH_MAX_CTX_STR_LEN 255
 
 //  context
 struct slh_ctx_s {

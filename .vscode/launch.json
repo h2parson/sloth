@@ -1,0 +1,48 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+
+    
+        "version": "0.2.0",
+        "configurations": [
+          {
+            "name": "Debug kat_test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/slh/kat_test",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb" // or "gdb" for Linux/WSL
+          },
+          {
+            "name": "Debug ACVP_keygen_test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/slh/ACVP_keygen_test",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb"
+          },
+          {
+            "name": "Debug ACVP_sig_test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/slh/ACVP_sig_test",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb"
+          }
+        ]
+}
+
+    
